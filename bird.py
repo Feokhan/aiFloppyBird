@@ -1,15 +1,9 @@
 import pygame
 import random
+from neural import Neural
+from defs import *
 
-WIN_HEIGHT = 600
-BIRD_FILENAME = 'img/bird.png'
-BIRD_START_SPEED = -0.32
-BIRD_START_X = 200
-BIRD_START_Y = 200
-BIRD_ALIVE = 1
-BIRD_DEAD = 0
-GRAVITY = 0.001
-GENERATION_SIZE = 60
+
 
 
 class Bird():
@@ -22,6 +16,7 @@ class Bird():
         self.speed = 0
         self.time_lived = 0
         self.set_position(BIRD_START_X, BIRD_START_Y)
+        self.neural = Neural(NNET_INPUTS, NNET_HIDDEN, NNET_OUTPUTS)
 
     def set_position(self, x, y):
         self.rect.centerx = x
@@ -42,8 +37,12 @@ class Bird():
             self.rect.top = 0
             self.speed = 0
 
-    def jump(self):
-        self.speed = BIRD_START_SPEED
+    def jump(self, pipes):
+        inputs = self.get_inputs(pipes)
+        output = self.neural.get_max_value(inputs)
+        if output > 0.5:
+            self.speed = BIRD_START_SPEED
+        #self.speed = BIRD_START_SPEED
 
     def draw(self):
         self.gameDisplay.blit(self.img, self.rect)
@@ -68,8 +67,28 @@ class Bird():
         if self.state == BIRD_ALIVE:
             self.time_lived += dt
             self.move(dt)
+            self.jump(pipes)
             self.draw()
             self.check_status(pipes, pipes_down)
+
+    def get_inputs(self, pipes):
+        print()
+        closest = WIN_WIDTH + 10
+        heigth = 0
+        for p in pipes:
+            if closest > p.right > self.rect.left:
+                closest = p.right
+                heigth = p.top
+
+        distance = closest-self.rect.right
+        vertical_distance = heigth - self.rect.centery
+        normalized_distance = distance/WIN_WIDTH
+        normalized_vertical_distance = vertical_distance/WIN_HEIGHT
+
+        inputs = [normalized_distance, normalized_vertical_distance]
+        return inputs
+
+
 
 
 class BirdCollection():
@@ -87,8 +106,6 @@ class BirdCollection():
     def update(self, dt, pipes, pipes_down):
         num_alive = 0
         for b in self.birds:
-            if random.randint(0,4) == 1:
-                b.jump()
             b.update(dt, pipes, pipes_down)
             if b.state == BIRD_ALIVE:
                 num_alive += 1

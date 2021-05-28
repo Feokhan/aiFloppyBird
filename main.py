@@ -2,10 +2,11 @@ import pygame
 import random
 from bird import Bird
 from bird import BirdCollection
+import numpy as np
 
 WIN_HEIGHT = 600
 WIN_WIDTH = 900
-PIPE_GAP = 200
+PIPE_GAP = 150
 G_FORCE = 9
 DATA_FONT_SIZE = 10
 DATA_FONT_COLOR = (40, 40, 40)
@@ -42,21 +43,6 @@ def pipe_movement(window, pipes, pipe_image):
         pipe.centerx -= 5
     for pipe in pipes:
         window.blit(pipe_image, pipe)
-
-
-'''def collision(pipes, bird_rect):
-    for pipe in pipes:
-        if pipe.colliderect(bird_rect):
-            #print("collision")
-            return True
-    if bird_rect.top <= -25:
-        #print("collision with ceiling")
-        return True
-    if bird_rect.bottom >= 575:
-        #print("collission bottom")
-        return True
-    return False
-'''
 
 def game_build():
     pygame.init()
@@ -137,7 +123,6 @@ def game_build():
         num_alive = birds.update(dt, pipes_list, pipes_down_list)
         update_data_labels(window, dt, game_time, num_iterations, num_alive, label_font)
         #bird.update(dt, pipes_list, pipes_down_list)
-
 
         if num_alive == 0:
             pipes_list = []
