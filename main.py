@@ -3,15 +3,8 @@ import random
 from bird import Bird
 from bird import BirdCollection
 import numpy as np
+from defs import *
 
-WIN_HEIGHT = 600
-WIN_WIDTH = 900
-PIPE_GAP = 150
-G_FORCE = 9
-DATA_FONT_SIZE = 10
-DATA_FONT_COLOR = (40, 40, 40)
-FPS = 60
-vel = 0
 
 
 def base_movement(window, base_image, x_val):
@@ -78,7 +71,7 @@ def game_build():
     pipes_list = []
     pipes_down_list = []
     TIMER = pygame.USEREVENT
-    pygame.time.set_timer(TIMER, 1300)
+    pygame.time.set_timer(TIMER, TIMER_MS)
     birds = BirdCollection(window)
     num_iterations = 1
 
@@ -128,10 +121,8 @@ def game_build():
             pipes_list = []
             pipes_down_list = []
             game_time = 0
-            birds.create_new_generation()
+            birds.evolve()
             num_iterations += 1
-            print("XDDD")
-            #break;
         #update
         clock.tick(FPS)
         pygame.display.update()

@@ -1,7 +1,9 @@
 import pygame
 import random
 from neural import Neural
+import numpy as np
 from defs import *
+import scipy.special
 
 
 
@@ -15,12 +17,20 @@ class Bird():
         self.rect = self.img.get_rect()
         self.speed = 0
         self.time_lived = 0
+        self.fitness = 0
         self.set_position(BIRD_START_X, BIRD_START_Y)
         self.neural = Neural(NNET_INPUTS, NNET_HIDDEN, NNET_OUTPUTS)
 
     def set_position(self, x, y):
         self.rect.centerx = x
         self.rect.centery = y
+
+    def reset(self):
+        self.state = BIRD_ALIVE
+        self.speed = 0
+        self.fitness = 0
+        self.time_lived = 0
+        self.set_position(BIRD_START_X, BIRD_START_Y)
 
     def move(self, dt):
 
@@ -48,7 +58,7 @@ class Bird():
         self.gameDisplay.blit(self.img, self.rect)
 
     def check_status(self, pipes, pipes_down):
-        if self.rect.bottom > WIN_HEIGHT:
+        if self.rect.bottom > WIN_HEIGHT or self.rect.top <= 0:
             self.state = BIRD_DEAD
         else:
             self.check_hits(pipes, pipes_down)
@@ -57,10 +67,14 @@ class Bird():
         for p in pipes:
             if p.colliderect(self.rect):
                 self.state = BIRD_DEAD
+                gap_y = p.bottom - PIPE_GAP / 2
+                self.fitness = -(abs(self.rect.centery - gap_y)) * 3
                 break
         for p in pipes_down:
             if p.colliderect(self.rect):
                 self.state = BIRD_DEAD
+                gap_y = p.bottom + PIPE_GAP / 2
+                self.fitness = -(abs(self.rect.centery + gap_y)) * 3
                 break
 
     def update(self, dt, pipes, pipes_down):
@@ -72,7 +86,6 @@ class Bird():
             self.check_status(pipes, pipes_down)
 
     def get_inputs(self, pipes):
-        print()
         closest = WIN_WIDTH + 10
         heigth = 0
         for p in pipes:
@@ -87,6 +100,11 @@ class Bird():
 
         inputs = [normalized_distance, normalized_vertical_distance]
         return inputs
+
+    def create_offspring(b1, b2, gameDisplay):
+        offspring = Bird(gameDisplay)
+        offspring.neural.reproduce_neural(b1.neural, b2.neural)
+        return offspring
 
 
 
@@ -112,4 +130,28 @@ class BirdCollection():
 
         return num_alive
 
+    def evolve(self):
+        for b in self.birds:
+            #b.fitness += b.time_lived*(TIMER_MS/1000)
+            b.fitness += b.time_lived
+            #print(b.fitness)
+        self.birds.sort(key=lambda x: x.fitness, reverse=True)
+        x = (int(len(self.birds)*KEEP_BEST_PERC))
+        good_birds = self.birds[0:x]
+        bad_birds = self.birds[x:]
+        for b in bad_birds:
+            b.neural.random_mutation()
+        new_birds = []
+        new_birds = random.sample(bad_birds, int(len(bad_birds)*KEEP_BAD_PERC))
+        new_birds.extend(good_birds)
+        remaining_children = len(self.birds)-len(new_birds)
+        while len(new_birds) < len(self.birds):
+            parents = random.sample(good_birds, 2)
+            new_bird = Bird.create_offspring(parents[0], parents[1], self.window)
+            if random.random() < MUTATION_CHANCE:
+                new_bird.neural.random_mutation()
+            new_birds.append(new_bird)
 
+        for b in new_birds:
+            b.reset()
+        self.birds = new_birds

@@ -1,5 +1,7 @@
 import numpy as np
 import scipy.special
+import random
+from defs import *
 
 
 class Neural:
@@ -25,3 +27,35 @@ class Neural:
     def get_max_value(self, inputs_list):
         outputs = self.outputs(inputs_list)
         return np.max(outputs)
+
+    def random_mutation(self):
+        mutation(self.weight_input_hidden)
+        mutation(self.weight_output_hidden)
+
+    def reproduce_neural(self, neural1, neural2):
+        self.weight_output_hidden = reproduce(neural1.weight_input_hidden, neural2.weight_input_hidden)
+        self.weight_output_hidden = reproduce(neural1.weight_output_hidden, neural2.weight_output_hidden)
+
+
+def mutation(arr):
+    for x in np.nditer(arr, op_flags=['readwrite']):
+        if random.random() < MUTATION_CHANCE:
+            x[...] = np.random.random_sample()-0.5
+
+
+def reproduce(arr1, arr2):
+    total = arr1.size
+    rows = arr1.shape[0]
+    cols = arr1.shape[1]
+    # ret = [rows][cols]
+    ret = np.empty([rows, cols])
+    x = int(total*MIX_PERC)
+    for i in range(0, rows):
+        for j in range(0, cols):
+            if x < cols*rows+i:
+                ret[i][j] = arr1[i][j]
+            else:
+                ret[i][j] = arr2[i][j]
+    return ret
+
+
