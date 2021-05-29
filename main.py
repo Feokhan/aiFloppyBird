@@ -88,7 +88,7 @@ def game_build():
                 if event.key == pygame.K_UP:
                     running = False
             if event.type == TIMER:
-                rand_h = [400, 350, 300, 250, 450]
+                rand_h = [450, 400, 350, 300, 250, 200]
                 rand_pipe = random.choice(rand_h)
                 pipes = pipe_image.get_rect(midtop=(WIN_WIDTH+10, rand_pipe))
                 pipes_down = pipe_down_image.get_rect(midbottom=(WIN_WIDTH+10, rand_pipe-PIPE_GAP))
