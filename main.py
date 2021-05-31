@@ -121,6 +121,8 @@ def game_build():
             pipes_list = []
             pipes_down_list = []
             game_time = 0
+            #print('best', birds.get_best())
+            #print('worst', birds.get_worst())
             birds.evolve()
             num_iterations += 1
         #update

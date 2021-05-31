@@ -59,22 +59,24 @@ class Bird():
 
     def check_status(self, pipes, pipes_down):
         if self.rect.bottom > WIN_HEIGHT or self.rect.top <= 0:
+            self.fitness = -WIN_HEIGHT
             self.state = BIRD_DEAD
         else:
             self.check_hits(pipes, pipes_down)
 
     def check_hits(self, pipes, pipes_down):
+        gap_y = 0;
         for p in pipes:
             if p.colliderect(self.rect):
                 self.state = BIRD_DEAD
-                gap_y = p.bottom - PIPE_GAP / 2
-                self.fitness = -(abs(self.rect.centery - gap_y)) * 3
+                gap_y = p.top - PIPE_GAP / 2
+                self.fitness = -(abs(self.rect.centery - gap_y))
                 break
         for p in pipes_down:
             if p.colliderect(self.rect):
                 self.state = BIRD_DEAD
                 gap_y = p.bottom + PIPE_GAP / 2
-                self.fitness = -(abs(self.rect.centery + gap_y)) * 3
+                self.fitness = -(abs(self.rect.centery - gap_y))
                 break
 
     def update(self, dt, pipes, pipes_down):
@@ -87,14 +89,14 @@ class Bird():
 
     def get_inputs(self, pipes):
         closest = WIN_WIDTH + 10
-        heigth = 0
+        height = 0
         for p in pipes:
             if closest > p.right > self.rect.left:
                 closest = p.right
-                heigth = p.top
+                height = p.top
 
         distance = closest-self.rect.right
-        vertical_distance = heigth - self.rect.centery
+        vertical_distance = height - self.rect.centery
         normalized_distance = distance/WIN_WIDTH
         normalized_vertical_distance = vertical_distance/WIN_HEIGHT
 
@@ -130,6 +132,14 @@ class BirdCollection():
 
         return num_alive
 
+    def get_avg(self):
+        total = 0
+        for b in self.birds:
+            total += b.fitness
+        ret = total/GENERATION_SIZE
+        return ret
+
+
     def evolve(self):
         for b in self.birds:
             #b.fitness += b.time_lived*(TIMER_MS/1000)
@@ -137,6 +147,9 @@ class BirdCollection():
             #print(b.fitness)
         self.birds.sort(key=lambda x: x.fitness, reverse=True)
         x = (int(len(self.birds)*KEEP_BEST_PERC))
+        print('best', self.birds[0].fitness)
+        print('avg', self.get_avg())
+        print('worst', self.birds[len(self.birds)-1].fitness)
         good_birds = self.birds[0:x]
         bad_birds = self.birds[x:]
         for b in bad_birds:
@@ -155,3 +168,11 @@ class BirdCollection():
         for b in new_birds:
             b.reset()
         self.birds = new_birds
+
+    def get_best(self):
+        self.birds.sort(key=lambda x: x.fitness, reverse=True)
+        return self.birds[0].fitness
+
+    def get_worst(self):
+        self.birds.sort(key=lambda x: x.fitness, reverse=True)
+        return self.birds[len(self.birds)-1].fitness
