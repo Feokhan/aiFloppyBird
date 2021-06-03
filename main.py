@@ -73,7 +73,9 @@ def game_build():
     TIMER = pygame.USEREVENT
     pygame.time.set_timer(TIMER, TIMER_MS)
     birds = BirdCollection(window)
+
     num_iterations = 1
+    num_iterations = birds.load_generation("data/iteration62.npz")
 
     while running:
         #time
@@ -84,6 +86,7 @@ def game_build():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                birds.save_generation(num_iterations)
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
                     running = False
