@@ -15,13 +15,9 @@ class Neural:
 
     def outputs(self, inputs_list):
         inputs = np.array(inputs_list, ndmin=2).T
-        #print('inputs', inputs, sep='\n') #wypisanie inputow w konsoli
         hidden_inputs = np.dot(self.weight_input_hidden, inputs) #mnozenie macierzy wagi x wejscia
-        #print('hidden_inputs', hidden_inputs, sep='\n')
         hidden_outputs = self.activation(hidden_inputs)
-        #print('hidden_outputs', hidden_outputs, sep='\n')  # wypisanie wartosci w hidden node po funkcji aktywacji w konsoli
         final_outputs = np.dot(self.weight_output_hidden, hidden_outputs)
-        #print('final_outputs', final_outputs, sep='\n')
         return final_outputs
 
     def get_max_value(self, inputs_list):
@@ -39,7 +35,7 @@ class Neural:
 
 def mutation(arr):
     for x in np.nditer(arr, op_flags=['readwrite']):
-        if random.random() < MUTATION_CHANCE:
+        if random.random() < WEIGHT_MUTATION_CHANCE:
             x[...] = np.random.random_sample()-0.5
 
 
@@ -47,7 +43,6 @@ def reproduce(arr1, arr2):
     total = arr1.size
     rows = arr1.shape[0]
     cols = arr1.shape[1]
-    # ret = [rows][cols]
     ret = np.empty([rows, cols])
     x = int(total*MIX_PERC)
     for i in range(0, rows):

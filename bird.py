@@ -53,7 +53,6 @@ class Bird():
         output = self.neural.get_max_value(inputs)
         if output > 0.5:
             self.speed = BIRD_START_SPEED
-        #self.speed = BIRD_START_SPEED
 
     def draw(self):
         self.gameDisplay.blit(self.img, self.rect)
@@ -102,7 +101,6 @@ class Bird():
         vertical_distance = height - self.rect.centery
         normalized_distance = distance/WIN_WIDTH #znormalizowac lepiej?
         normalized_vertical_distance = vertical_distance/WIN_HEIGHT
-        #print('normalized vd', normalized_vertical_distance)
         inputs = [normalized_distance, normalized_vertical_distance]
         return inputs
 
@@ -148,21 +146,19 @@ class BirdCollection():
 
     def evolve(self):
         for b in self.birds:
-            #b.fitness += b.time_lived*(TIMER_MS/1000)
             b.fitness += b.time_lived*10
-            #print(b.fitness)
         self.birds.sort(key=lambda x: x.fitness, reverse=True)
         x = (int(len(self.birds)*KEEP_BEST_PERC))
         print('best', self.birds[0].fitness)
         print('avg', self.get_avg())
         print('worst', self.birds[len(self.birds)-1].fitness)
         #dane do wykresow
-        #self.graph_data_avg.append(self.get_avg())
-        np.append(self.graph_data_avg, self.get_avg())
-        #self.graph_data_best.append(self.birds[0].fitness)
-        np.append(self.graph_data_best, self.birds[0].fitness)
-        #self.graph_data_worst.append(self.birds[len(self.birds)-1].fitness)
-        np.append(self.graph_data_worst, self.birds[len(self.birds)-1].fitness)
+
+        self.graph_data_avg.append(self.get_avg())
+
+        self.graph_data_best.append(self.birds[0].fitness)
+
+        self.graph_data_worst.append(self.birds[len(self.birds)-1].fitness)
 
         good_birds = self.birds[0:x]
         bad_birds = self.birds[x:]
@@ -197,7 +193,6 @@ class BirdCollection():
         for b in self.birds:
             input_weights.append(b.neural.weight_input_hidden)
             output_weights.append(b.neural.weight_output_hidden)
-
         np.savez("{}{}".format("data/iteration", iterations), inputs=input_weights, outputs=output_weights,
                  iterations=iterations, avg=self.graph_data_avg, best=self.graph_data_best, worst=self.graph_data_worst)
 
@@ -206,7 +201,7 @@ class BirdCollection():
             print("brak pliku")
             self.create_new_generation()
             return 0
-        self.create_new_generation()
+        #self.create_new_generation()
         data = np.load(filename)
         indx = 0
         for b in self.birds:
@@ -214,7 +209,7 @@ class BirdCollection():
             b.neural.weight_output_hidden = data['outputs'][indx]
             indx += 1
 
-        self.graph_data_worst = data['worst']
-        self.graph_data_avg = data['avg']
-        self.graph_data_best = data['best']
+        self.graph_data_worst = data['worst'].tolist()
+        self.graph_data_avg = data['avg'].tolist()
+        self.graph_data_best = data['best'].tolist()
         return data['iterations']

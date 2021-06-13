@@ -58,7 +58,6 @@ def game_build():
     bird_rect = bird_image.get_rect(center=(250, WIN_HEIGHT/2))
     g_force = G_FORCE
     bird_next_pos = WIN_HEIGHT/2-100
-    #bird = Bird(window)
     #bird jump
     distance = 0
     new_speed = 0
@@ -75,7 +74,7 @@ def game_build():
     birds = BirdCollection(window)
 
     num_iterations = 1
-    num_iterations = birds.load_generation("data/iteration62.npz")
+    num_iterations = birds.load_generation("data/iteration134.npz")
 
     while running:
         #time
@@ -100,12 +99,6 @@ def game_build():
 
         #game
         window.blit(bg_image, (0,0))
-        #collision detection
-        #collision(pipes_list, bird.rect)
-        #collision(pipes_down_list, bird.rect)
-        #if collision(pipes_list, bird.rect) or collision(pipes_down_list, bird.rect):
-        #    bird.set_dead()
-        #    break
         # pipe movement
         pipe_movement(window, pipes_list, pipe_image)
         pipe_movement(window, pipes_down_list, pipe_down_image)
@@ -118,14 +111,11 @@ def game_build():
         # update data labels
         num_alive = birds.update(dt, pipes_list, pipes_down_list)
         update_data_labels(window, dt, game_time, num_iterations, num_alive, label_font)
-        #bird.update(dt, pipes_list, pipes_down_list)
 
         if num_alive == 0:
             pipes_list = []
             pipes_down_list = []
             game_time = 0
-            #print('best', birds.get_best())
-            #print('worst', birds.get_worst())
             birds.evolve()
             num_iterations += 1
         #update
